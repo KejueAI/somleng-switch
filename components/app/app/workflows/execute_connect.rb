@@ -23,6 +23,9 @@ class ExecuteConnect < ExecuteTwiMLVerb
       call_update_event_handler.channel_for(phone_call.id)
     ]
 
+    # Track whether we exited via a call update (redirect) vs stream disconnect
+    redirected = false
+
     redis_connection.call.with do |connection|
       connection.subscribe(*subscribe_to) do |on|
         on.subscribe do |channel|
@@ -40,13 +43,28 @@ class ExecuteConnect < ExecuteTwiMLVerb
               DisconnectTwilioStream.call(context)
             end
           elsif call_update_event_handler.handle_events_for?(channel, phone_call.id)
-            handle_call_update_event(message) { connection.unsubscribe }
+            redirected = true
+            handle_call_update_event(message) { connection.unsubscribe(channel) }
           end
         end
       end
     end
 
-    call_update_event_handler.perform_queued
+    if redirected
+      call_update_event_handler.perform_queued
+    elsif verb.attributes["action"].present?
+      # Stream ended without a call update (e.g., agent closed WebSocket).
+      # Fetch TwiML from the <Connect action="..."> URL to continue the call
+      # (used for cold/warm transfer fallback via /api/stream-action).
+      throw(
+        :redirect,
+        {
+          url: verb.attributes["action"],
+          http_method: verb.attributes.fetch("method", "POST"),
+          params: { "CallStatus" => "in-progress" }
+        }
+      )
+    end
   end
 
   private
