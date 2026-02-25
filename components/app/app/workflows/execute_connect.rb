@@ -40,7 +40,7 @@ class ExecuteConnect < ExecuteTwiMLVerb
               DisconnectTwilioStream.call(context)
             end
           elsif call_update_event_handler.handle_events_for?(channel, phone_call.id)
-            handle_call_update_event(message) { connection.unsubscribe(channel) }
+            handle_call_update_event(message) { connection.unsubscribe }
           end
         end
       end

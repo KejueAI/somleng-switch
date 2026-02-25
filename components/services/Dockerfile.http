@@ -1,0 +1,53 @@
+FROM ruby:3.4-slim AS build
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      git build-essential libpq-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY Gemfile.http Gemfile
+
+RUN gem install bundler && \
+    bundle config --local path "vendor/bundle" && \
+    bundle config --local without 'development test' && \
+    bundle install
+
+RUN rm -rf vendor/bundle/ruby/*/cache/ && \
+    find vendor/ -name "*.o" -delete && \
+    find vendor/ -name "*.c" -delete 2>/dev/null; true
+
+COPY server.rb ./
+COPY app/models/database_connection.rb ./app/models/database_connection.rb
+COPY app/models/database_connections.rb ./app/models/database_connections.rb
+COPY app/models/application_record.rb ./app/models/application_record.rb
+COPY app/models/opensips_subscriber.rb ./app/models/opensips_subscriber.rb
+COPY app/models/opensips_address.rb ./app/models/opensips_address.rb
+COPY app/models/opensips_domain.rb ./app/models/opensips_domain.rb
+COPY app/jobs/create_opensips_subscriber_job.rb ./app/jobs/create_opensips_subscriber_job.rb
+COPY app/jobs/delete_opensips_subscriber_job.rb ./app/jobs/delete_opensips_subscriber_job.rb
+COPY app/jobs/create_opensips_permission_job.rb ./app/jobs/create_opensips_permission_job.rb
+COPY app/jobs/update_opensips_permission_job.rb ./app/jobs/update_opensips_permission_job.rb
+COPY app/jobs/delete_opensips_permission_job.rb ./app/jobs/delete_opensips_permission_job.rb
+
+# #############################
+
+FROM ruby:3.4-slim
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends libpq5 && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=build /app /app
+
+ENV RUBY_YJIT_ENABLE=true
+ENV PORT=3000
+ENV BUNDLE_PATH=/app/vendor/bundle
+ENV BUNDLE_WITHOUT=development:test
+
+EXPOSE 3000
+
+CMD ["bundle", "exec", "ruby", "server.rb"]

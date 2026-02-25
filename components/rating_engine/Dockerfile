@@ -12,7 +12,7 @@ RUN chmod +x build.sh && ./build.sh
 
 FROM public.ecr.aws/docker/library/alpine:latest AS base
 
-RUN apk add --no-cache bash ca-certificates
+RUN apk add --no-cache bash ca-certificates postgresql-client
 
 # Copy CGRateS binaries
 COPY --from=builder /go/bin/cgr-engine /usr/bin/cgr-engine

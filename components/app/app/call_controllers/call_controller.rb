@@ -44,14 +44,18 @@ class CallController < Adhearsion::CallController
 
     call_serializer = CallSerializer.new(call)
 
+    callee = call.variables["variable_sip_h_x_somleng_callee_identity"] || call.variables["variable_sip_to_user"]
+    caller_id = call.variables["variable_sip_h_x_somleng_caller_identity"] || call.variables["variable_sip_from_user"]
+
     response = call_platform_client.create_inbound_call(
-      to: call.variables.fetch("variable_sip_h_x_somleng_callee_identity"),
-      from: call.variables.fetch("variable_sip_h_x_somleng_caller_identity"),
+      to: callee,
+      from: caller_id,
       external_id: call_serializer.id,
       host: call_serializer.host,
       region: AppSettings.fetch(:region),
       source_ip: call.variables["variable_sip_h_x_src_ip"] || call.variables["variable_sip_via_host"],
       client_identifier: call.variables["variable_sip_h_x_somleng_client_identifier"],
+      gateway_id: call.variables["variable_somleng_gateway_id"],
       variables: {
         sip_from_host: call.variables["variable_sip_from_host"],
         sip_to_host: call.variables["variable_sip_to_host"],

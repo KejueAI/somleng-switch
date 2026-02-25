@@ -24,12 +24,15 @@ if [ "$1" = 'opensips' ]; then
     SIP_ADVERTISED_IP="${SIP_ADVERTISED_IP:="$(hostname -i)"}"
   fi
 
+  SIP_REALM="${SIP_REALM:="somleng.org"}"
+
   sed -i "s|FIFO_NAME|\"$FIFO_NAME\"|g" /etc/opensips/opensips.cfg
   sed -i "s|DATABASE_URL|\"$DATABASE_URL\"|g" /etc/opensips/opensips.cfg
   sed -i "s|SIP_PORT|$SIP_PORT|g" /etc/opensips/opensips.cfg
   sed -i "s|SIP_ADVERTISED_IP|$SIP_ADVERTISED_IP|g" /etc/opensips/opensips.cfg
   sed -i "s|LOCAL_IP|$LOCAL_IP|g" /etc/opensips/opensips.cfg
   sed -i "s|INTERFACE_NAME|$INTERFACE_NAME|g" /etc/opensips/opensips.cfg
+  sed -i "s|SIP_REALM|$SIP_REALM|g" /etc/opensips/opensips.cfg
 
   exec "$OPENSIPS_CONTAINER_BINARY" -F
 fi

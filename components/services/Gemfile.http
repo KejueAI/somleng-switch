@@ -1,0 +1,13 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+# Only the gems needed for the HTTP services server.
+# This is a minimal subset of the full Gemfile — no AWS SDKs, no Sentry,
+# no encrypted_credentials.
+
+gem "pg"
+gem "rackup"
+gem "sequel"
+gem "sinatra"
+gem "puma"

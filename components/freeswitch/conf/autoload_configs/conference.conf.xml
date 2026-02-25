@@ -1,0 +1,27 @@
+<configuration name="conference.conf" description="Conference">
+  <advertise />
+
+  <caller-controls>
+    <group name="default">
+      <control action="mute" digits="0"/>
+      <control action="deaf mute" digits="*"/>
+      <control action="hangup" digits="#"/>
+    </group>
+    <group name="none" />
+  </caller-controls>
+
+  <profiles>
+    <profile name="default">
+      <param name="domain" value="$${domain}"/>
+      <param name="rate" value="8000"/>
+      <param name="interval" value="20"/>
+      <param name="energy-level" value="100"/>
+      <param name="comfort-noise" value="true"/>
+      <param name="moh-sound" value="silence_stream://0"/>
+      <param name="caller-controls" value="none"/>
+      <param name="announce-count" value="0"/>
+      <param name="suppress-events" value="start-talking,stop-talking"/>
+      <param name="max-members" value="10"/>
+    </profile>
+  </profiles>
+</configuration>

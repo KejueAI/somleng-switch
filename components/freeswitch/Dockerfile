@@ -62,6 +62,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq libssl-dev lib
             freeswitch-mod-json-cdr \
             freeswitch-mod-flite \
             freeswitch-mod-tone-stream \
+            freeswitch-mod-conference \
             freeswitch-mod-tts-commandline && \
             apt-get purge -y --auto-remove wget gnupg2 lsb-release \
             && apt-get clean \
