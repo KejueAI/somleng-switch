@@ -1,16 +1,17 @@
 FROM public.ecr.aws/docker/library/debian:bookworm-slim AS freeswitch-build
-ARG signalwire_token
 
 RUN apt update && apt install --no-install-recommends -yq cmake gcc g++ make cmake build-essential git libssl-dev libspeex-dev libspeexdsp-dev autoconf automake libtool pkg-config libpcre3-dev libpcre3
 
-RUN apt-get update && apt-get install --no-install-recommends -yq gnupg2 wget ca-certificates lsb-release && \
-    wget --http-user=signalwire --http-password=${signalwire_token} -O /usr/share/keyrings/signalwire-freeswitch-repo.gpg https://freeswitch.signalwire.com/repo/deb/debian-release/signalwire-freeswitch-repo.gpg && \
-    echo "machine freeswitch.signalwire.com login signalwire password ${signalwire_token}" > /etc/apt/auth.conf && \
+RUN --mount=type=secret,id=signalwire_token \
+    apt-get update && apt-get install --no-install-recommends -yq gnupg2 wget ca-certificates lsb-release && \
+    wget --http-user=signalwire --http-password=$(cat /run/secrets/signalwire_token) -O /usr/share/keyrings/signalwire-freeswitch-repo.gpg https://freeswitch.signalwire.com/repo/deb/debian-release/signalwire-freeswitch-repo.gpg && \
+    echo "machine freeswitch.signalwire.com login signalwire password $(cat /run/secrets/signalwire_token)" > /etc/apt/auth.conf && \
     chmod 600 /etc/apt/auth.conf && \
     echo "deb [signed-by=/usr/share/keyrings/signalwire-freeswitch-repo.gpg] https://freeswitch.signalwire.com/repo/deb/debian-release/ `lsb_release -sc` main" > /etc/apt/sources.list.d/freeswitch.list && \
     echo "deb-src [signed-by=/usr/share/keyrings/signalwire-freeswitch-repo.gpg] https://freeswitch.signalwire.com/repo/deb/debian-release/ `lsb_release -sc` main" >> /etc/apt/sources.list.d/freeswitch.list && \
     apt-get update --allow-releaseinfo-change && \
-    apt-get -y install --no-install-recommends libfreeswitch-dev
+    apt-get -y install --no-install-recommends libfreeswitch-dev && \
+    rm -f /etc/apt/auth.conf
 
 COPY src/mod/mod_twilio_stream /usr/src/mod_twilio_stream
 
@@ -35,11 +36,10 @@ FROM public.ecr.aws/aws-cli/aws-cli AS aws-cli
 
 FROM public.ecr.aws/docker/library/debian:bookworm-slim
 
-ARG signalwire_token
-
-RUN apt-get update && apt-get install --no-install-recommends -yq libssl-dev libspeex-dev libspeexdsp-dev gnupg2 wget ca-certificates lsb-release curl jq && \
-    wget --http-user=signalwire --http-password=${signalwire_token} -O /usr/share/keyrings/signalwire-freeswitch-repo.gpg https://freeswitch.signalwire.com/repo/deb/debian-release/signalwire-freeswitch-repo.gpg && \
-    echo "machine freeswitch.signalwire.com login signalwire password ${signalwire_token}" > /etc/apt/auth.conf && \
+RUN --mount=type=secret,id=signalwire_token \
+    apt-get update && apt-get install --no-install-recommends -yq libssl-dev libspeex-dev libspeexdsp-dev gnupg2 wget ca-certificates lsb-release curl jq && \
+    wget --http-user=signalwire --http-password=$(cat /run/secrets/signalwire_token) -O /usr/share/keyrings/signalwire-freeswitch-repo.gpg https://freeswitch.signalwire.com/repo/deb/debian-release/signalwire-freeswitch-repo.gpg && \
+    echo "machine freeswitch.signalwire.com login signalwire password $(cat /run/secrets/signalwire_token)" > /etc/apt/auth.conf && \
     chmod 600 /etc/apt/auth.conf && \
     echo "deb [signed-by=/usr/share/keyrings/signalwire-freeswitch-repo.gpg] https://freeswitch.signalwire.com/repo/deb/debian-release/ `lsb_release -sc` main" > /etc/apt/sources.list.d/freeswitch.list && \
     echo "deb-src [signed-by=/usr/share/keyrings/signalwire-freeswitch-repo.gpg] https://freeswitch.signalwire.com/repo/deb/debian-release/ `lsb_release -sc` main" >> /etc/apt/sources.list.d/freeswitch.list && \
@@ -66,7 +66,7 @@ RUN apt-get update && apt-get install --no-install-recommends -yq libssl-dev lib
             freeswitch-mod-tts-commandline && \
             apt-get purge -y --auto-remove wget gnupg2 lsb-release \
             && apt-get clean \
-            && rm -rf /var/lib/apt/lists/*
+            && rm -rf /var/lib/apt/lists/* /etc/apt/auth.conf
 
 # Copy the Freeswitch configuration
 COPY --link conf/ /etc/freeswitch
