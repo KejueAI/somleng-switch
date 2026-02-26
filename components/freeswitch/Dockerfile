@@ -89,6 +89,8 @@ RUN ldconfig
 COPY --link docker-entrypoint.sh /docker-entrypoint.sh
 
 EXPOSE 5060/udp
+EXPOSE 5060/tcp
+EXPOSE 5061/tcp
 EXPOSE 5080/udp
 EXPOSE 5222/tcp
 EXPOSE 8021/tcp

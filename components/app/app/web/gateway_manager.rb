@@ -20,6 +20,7 @@ module SomlengAdhearsion
         proxy = gateway_params.fetch("proxy")
         outbound_proxy = gateway_params.fetch("outbound_proxy", proxy)
         auth_username = gateway_params["auth_username"]
+        register_transport = gateway_params.fetch("register_transport", "udp")
 
         params_xml = []
         params_xml << %(<param name="username" value="#{username}"/>)
@@ -29,7 +30,7 @@ module SomlengAdhearsion
         params_xml << %(<param name="outbound-proxy" value="#{outbound_proxy}"/>) if outbound_proxy
         params_xml << %(<param name="auth-username" value="#{auth_username}"/>) if auth_username
         params_xml << %(<param name="register" value="true"/>)
-        params_xml << %(<param name="register-transport" value="udp"/>)
+        params_xml << %(<param name="register-transport" value="#{register_transport}"/>)
         params_xml << %(<param name="expire-seconds" value="120"/>)
         params_xml << %(<param name="retry-seconds" value="30"/>)
         params_xml << %(<param name="ping" value="25"/>)

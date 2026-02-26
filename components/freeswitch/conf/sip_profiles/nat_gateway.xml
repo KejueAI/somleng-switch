@@ -5,6 +5,10 @@
   <settings>
     <X-PRE-PROCESS cmd="include" data="shared/settings.xml"/>
     <param name="sip-port" value="5060"/>
+    <param name="sip-tcp-port" value="5060"/>
+    <param name="tls" value="true"/>
+    <param name="tls-sip-port" value="5061"/>
+    <param name="tls-cert-dir" value="/usr/lib/freeswitch/certs"/>
     <param name="ext-sip-ip" value="$${external_sip_ip}"/>
     <param name="ext-rtp-ip" value="$${external_rtp_ip}"/>
   </settings>
