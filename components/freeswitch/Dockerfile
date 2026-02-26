@@ -68,6 +68,10 @@ RUN --mount=type=secret,id=signalwire_token \
             && apt-get clean \
             && rm -rf /var/lib/apt/lists/* /etc/apt/auth.conf
 
+# Install sngrep for SIP packet capture/debugging
+RUN apt-get update && apt-get install --no-install-recommends -yq sngrep \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Copy the Freeswitch configuration
 COPY --link conf/ /etc/freeswitch
 

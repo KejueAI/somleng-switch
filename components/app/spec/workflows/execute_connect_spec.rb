@@ -62,7 +62,7 @@ RSpec.describe ExecuteConnect, type: :call_controller do
   it "handles call updates" do
     verb = build_verb
     call_platform_client = stub_call_platform_client(stream_sid: "stream-sid")
-    event_handler, disconnect_event = stub_event_handler(ConnectEventHandler, disconnect: true)
+    event_handler, _disconnect_event = stub_event_handler(ConnectEventHandler, disconnect: true)
     call_update_event_handler, call_update_event = stub_event_handler(CallUpdateEventHandler)
     redis_connection = stub_fake_redis(
       channels: {
@@ -87,7 +87,9 @@ RSpec.describe ExecuteConnect, type: :call_controller do
       )
     )
 
-    expect(event_handler.handled_events).to match_array([ disconnect_event ])
+    # Call update unsubscribes from ALL channels immediately, so the stream
+    # disconnect event is never processed (correct — we're redirecting).
+    expect(event_handler.handled_events).to be_empty
     expect(call_update_event_handler.handled_events).to match_array([ call_update_event ])
     expect(StopTwilioStream).to have_received(:call)
   end

@@ -44,7 +44,7 @@ class ExecuteConnect < ExecuteTwiMLVerb
             end
           elsif call_update_event_handler.handle_events_for?(channel, phone_call.id)
             redirected = true
-            handle_call_update_event(message) { connection.unsubscribe(channel) }
+            handle_call_update_event(message) { connection.unsubscribe }
           end
         end
       end
