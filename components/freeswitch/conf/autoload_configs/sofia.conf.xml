@@ -1,4 +1,12 @@
 <configuration name="sofia.conf">
+  <!-- HEP v3 capture: mirror all SIP messages to Homer via heplify-server.
+       Set FS_HOMER_CAPTURE_SERVER env var to enable (e.g. heplify-server.chorus.svc.cluster.local).
+       When the env var is empty, capture-server points to an invalid address and
+       FreeSWITCH logs a warning but continues normally — no SIP capture occurs. -->
+  <global_settings>
+    <param name="capture-server" value="udp:$${homer_capture_server}:9060;hep=3;capture_id=100"/>
+  </global_settings>
+
   <profiles>
     <X-PRE-PROCESS cmd="include" data="../sip_profiles/*.xml"/>
   </profiles>
